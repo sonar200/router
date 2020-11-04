@@ -96,8 +96,14 @@ class ModuleRouter
                 if ($viewPage) {
                     $page = self::callMethod($entity[0], $entity[1], $params); //call_user_func_array($entity, array_values($params));
                     if (!empty($page)) {
-                        echo $page;
+                        if (is_array($page) || is_object($page) || is_bool($page)) {
+                            header('Content-Type: application/json');
+                            echo json_encode($page, JSON_UNESCAPED_UNICODE);
+                        } else {
+                            echo $page;
+                        }
                     }
+                    exit;
                 }
                 exit;
             }
