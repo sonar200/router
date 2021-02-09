@@ -28,9 +28,13 @@ class ModuleRouter
     /**
      * ModuleRoutes constructor.
      */
-    protected function __construct() { }
+    protected function __construct()
+    {
+    }
 
-    private function __clone() { }
+    private function __clone()
+    {
+    }
 
     /**
      * Принимает паттерн ссылки
@@ -64,13 +68,15 @@ class ModuleRouter
     {
         $obj = !empty($class) && class_exists($class) ? new $class() : new self::$defaultClass;
 
-        return !empty($method) && method_exists($obj, $method) ? [
-            $obj,
-            $method
-        ] : [
-            $obj,
-            self::$defaultMethod
-        ];
+        return !empty($method) && method_exists($obj, $method)
+            ? [
+                $obj,
+                $method
+            ]
+            : [
+                $obj,
+                self::$defaultMethod
+            ];
     }
 
     /**
@@ -90,27 +96,34 @@ class ModuleRouter
                 array_shift($params);
                 array_pop($params);
 
-                $entity = self::getCallback($callback[0], $callback[1]);
-                $viewPage = self::callMiddleWare($pattern, $entity, $callback);
-
-                if ($viewPage) {
-                    $page = self::callMethod($entity[0], $entity[1], $params); //call_user_func_array($entity, array_values($params));
-                    if (!empty($page)) {
-                        if (is_array($page) || is_object($page) || is_bool($page)) {
-                            header('Content-Type: application/json');
-                            echo json_encode($page, JSON_UNESCAPED_UNICODE);
-                        } else {
-                            echo $page;
-                        }
-                    }
-                    exit;
-                }
-                exit;
+                self::initCallback($pattern, $callback, $params);
             }
         }
+
+        self::initCallback('/', [self::$defaultClass, self::$defaultMethod], ['error404' => true]);
     }
 
+    private static function initCallback(?string $pattern, ?array $callback, ?array $params)
+    {
+        $entity = self::getCallback($callback[0], $callback[1]);
+        $viewPage = self::callMiddleWare($pattern, $entity, $callback);
 
+        if ($viewPage) {
+            $page = self::callMethod(
+                $entity[0], $entity[1], $params
+            ); //call_user_func_array($entity, array_values($params));
+            if (!empty($page)) {
+                if (is_array($page) || is_object($page) || is_bool($page)) {
+                    header('Content-Type: application/json');
+                    echo json_encode($page, JSON_UNESCAPED_UNICODE);
+                } else {
+                    echo $page;
+                }
+            }
+            exit;
+        }
+        exit;
+    }
 
     /**
      * @param mixed $defaultClass
@@ -137,14 +150,23 @@ class ModuleRouter
      *
      * @return bool|void
      */
-    private static function callMiddleWare(string $pattern, $entity, $callback){
+    private static function callMiddleWare(string $pattern, $entity, $callback)
+    {
         $viewPage = true;
         if (isset(self::$middleWare[$pattern])) {
             if ($callback[0] == self::$middleWare[$pattern]['class']) {
-                $viewPage = self::getMiddleWare($entity[0], self::$middleWare[$pattern]['method'], self::$middleWare[$pattern]['return']);
+                $viewPage = self::getMiddleWare(
+                    $entity[0], self::$middleWare[$pattern]['method'],
+                    self::$middleWare[$pattern]['return']
+                );
             } else {
-                $entityMiddleWare = self::getCallback(self::$middleWare[$pattern]['class'], self::$middleWare[$pattern]['method']);
-                $viewPage = self::getMiddleWare($entityMiddleWare[0], self::$middleWare[$pattern]['method'], self::$middleWare[$pattern]['return']);
+                $entityMiddleWare = self::getCallback(
+                    self::$middleWare[$pattern]['class'], self::$middleWare[$pattern]['method']
+                );
+                $viewPage = self::getMiddleWare(
+                    $entityMiddleWare[0], self::$middleWare[$pattern]['method'],
+                    self::$middleWare[$pattern]['return']
+                );
             }
         }
 
@@ -189,9 +211,11 @@ class ModuleRouter
      */
     private static function callMethod($object, string $method, array $params = [])
     {
-        return call_user_func_array([
-            $object,
-            $method
-        ], array_values($params));
+        return call_user_func_array(
+            [
+                $object,
+                $method
+            ], array_values($params)
+        );
     }
 }

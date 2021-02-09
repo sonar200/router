@@ -5,7 +5,7 @@
     "keywords": ["php", "router"],
     "homepage": "https://github.com/sonar200/router",
     "license": "MIT",
-    "version": "v0.0.2",
+    "version": "v0.0.3",
     "authors": [
         {
             "name": "Ivan Ivanov",
@@ -15,9 +15,6 @@
     "require": {
         "php": ">=7.3",
         "ext-json": "*"
-    },
-    "config": {
-        "bin-dir": "vendor/bin"
     },
     "autoload": {
         "psr-4": {
